@@ -1,0 +1,72 @@
+---
+title: "Blast"
+output: html_document
+---
+
+Blast is a common approach used throughout efforts. Here is a notebook to get you started with a test dataset. As part you will be writing to a directory named `big-stuff` this directory is ignored by git.
+
+
+Blast will need to be installed on your local machine. 
+
+## Download stand-alone blast (optional)
+see ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+```{bash}
+cd /Applications/bioinfo/
+curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.12.0+-x64-macosx.tar.gz
+tar -xf ncbi-blast-2.12.0+-x64-macosx.tar.gz
+cd -
+```
+
+
+## Set blast directory
+
+```{bash}
+bldir=/Applications/bioinfo/ncbi-blast-2.12.0+/bin/
+#run blastx help to test 
+${bldir}blastx -h
+```
+
+## Create blast database (protein)
+
+Check release at https://www.uniprot.org/downloads. For example the release used here is **r2021_04**
+
+```{bash}
+cd ../big-stuff
+curl -O https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+mv uniprot_sprot.fasta.gz uniprot_sprot_r2021_04.fasta.gz
+gunzip -k uniprot_sprot_r2021_04.fasta.gz
+cd -
+```
+
+
+```{bash}
+#will need to re assign bldir
+bldir=/Applications/bioinfo/ncbi-blast-2.12.0+/bin/
+
+${bldir}makeblastdb \
+-in ../big-stuff/uniprot_sprot_r2021_04.fasta \
+-dbtype prot \
+-out ../big-stuff/uniprot_sprot_r2021_04
+```
+
+
+```{bash}
+
+#will need to re assign bldir
+bldir=/Applications/bioinfo/ncbi-blast-2.12.0+/bin/
+
+
+${bldir}blastx \
+-query ../data/tutorial/Ab_4denovo_CLC6_a.fa \
+-db ../big-stuff/uniprot_sprot_r2021_04 \
+-out ../analyses/tutorial/Ab_4-uniprot_blastx.tab \
+-evalue 1E-20 \
+-num_threads 8 \
+-max_target_seqs 1 \
+-outfmt 6
+```
+
+```{bash}
+head -3 ../analyses/tutorial/Ab_4-uniprot_blastx.tab
+```
+
